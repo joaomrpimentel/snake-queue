@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snake Task Queue</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>SNAKE TASK QUEUE</h1>
+      <button id="instructions-button" class="instructions-button" aria-label="Show instructions">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+      </button>
+    </header>
+
+    <form id="task-form">
+      <input 
+        type="text" 
+        id="task-input" 
+        placeholder="Enter new task..." 
+        required
+      >
+      <button type="submit">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14"></path>
+          <path d="M12 5v14"></path>
+        </svg>
+      </button>
+    </form>
+
+    <div class="snake-container">
+      <div id="snake-grid" class="snake-grid"></div>
+    </div>
+
+    <footer>
+      <p id="footer-text">Add tasks to grow the snake</p>
+      <p class="creator">Created by <a href="https://github.com/joaomrpimentel" target="_blank">João Pimentel</a></p>
+    </footer>
+  </div>
+
+  <!-- Instructions Modal -->
+  <div id="instructions-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>How to Use Snake Task Queue</h2>
+        <button id="close-modal" class="close-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <h3>🐍 Welcome to Snake Queue!</h3>
+        <p>A minimalist task manager inspired by the classic snake game.</p>
+        
+        <div class="instruction">
+          <h4>Adding Tasks</h4>
+          <p>1. Type your task in the input field at the top</p>
+          <p>2. Press Enter or click the + button to add it</p>
+          <p>3. Watch the snake grow with each new task!</p>
+        </div>
+        
+        <div class="instruction">
+          <h4>👁️ Viewing Tasks</h4>
+          <p>Hover over any segment of the snake to see the task description</p>
+        </div>
+        
+        <div class="instruction">
+          <h4>Completing Tasks</h4>
+          <p>Click on any segment of the snake to mark that task as complete</p>
+          <p>The snake will shrink as you complete tasks</p>
+        </div>
+        
+        <div class="instruction">
+          <h4>Important Notes</h4>
+          <p>• Tasks exist only during the current session</p>
+          <p>• Refreshing the page will clear all tasks</p>
+          <p>• Tasks are completed in any order you choose</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

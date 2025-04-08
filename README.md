@@ -1,1 +1,2 @@
-# snake-queue
+# 🐍 Snake Queue
+A minimalist task management tool with a classic snake game visualization. As you add tasks to your queue, the snake grows longer. Complete tasks by clicking on snake segments to remove them.
