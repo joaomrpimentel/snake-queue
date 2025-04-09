@@ -1,4 +1,11 @@
-/* Base styles */
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("./fonts/IBMPlexMono-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -6,7 +13,7 @@
 }
 
 body {
-  font-family: "Courier New", monospace;
+  font-family: "IBM Plex Mono", monospace;
   background-color: #000;
   color: #22c55e;
   min-height: 100vh;
@@ -21,18 +28,54 @@ body {
   min-height: 100vh;
 }
 
-/* Header */
 header {
   margin-bottom: 2rem;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+}
+
+.header-left,
+.header-center,
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.header-center {
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.header-right {
+  gap: 0.75rem;
 }
 
 h1 {
   font-size: 1.25rem;
-  font-weight: 300;
+  font-weight: 500;
   letter-spacing: 0.05em;
+}
+
+.status-text {
+  font-size: 0.75rem;
+  color: rgba(34, 197, 94, 0.7);
+  text-align: center;
+}
+
+.creator {
+  font-size: 0.7rem;
+  color: rgba(34, 197, 94, 0.5);
+  white-space: nowrap;
+}
+
+.creator a {
+  color: rgba(34, 197, 94, 0.8);
+  text-decoration: none;
+}
+
+.creator a:hover {
+  text-decoration: underline;
 }
 
 .instructions-button {
@@ -46,6 +89,7 @@ h1 {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .instructions-button:hover {
@@ -53,7 +97,6 @@ h1 {
   border-color: rgba(34, 197, 94, 0.5);
 }
 
-/* Form */
 form {
   display: flex;
   gap: 0.5rem;
@@ -68,6 +111,7 @@ input {
   height: 2.5rem;
   padding: 0 0.75rem;
   outline: none;
+  font-family: "IBM Plex Mono", monospace;
 }
 
 input:focus {
@@ -90,7 +134,6 @@ button:hover {
   background-color: rgba(34, 197, 94, 0.3);
 }
 
-/* Snake container */
 .snake-container {
   flex: 1;
   display: flex;
@@ -105,7 +148,6 @@ button:hover {
   aspect-ratio: 1 / 1;
 }
 
-/* Snake segments */
 .snake-segment {
   background-color: rgba(34, 197, 94, 0.8);
   border-radius: 2px;
@@ -138,7 +180,6 @@ button:hover {
   border-radius: 50%;
 }
 
-/* Task tooltip */
 .task-tooltip {
   position: absolute;
   top: 0;
@@ -154,36 +195,18 @@ button:hover {
   opacity: 0;
   transition: opacity 0.2s;
   pointer-events: none;
+  font-family: "IBM Plex Mono", monospace;
 }
 
 .snake-segment:hover .task-tooltip {
   opacity: 1;
 }
 
-/* Footer */
 footer {
   margin-top: 2rem;
   padding-top: 1rem;
-  text-align: center;
-  font-size: 0.75rem;
-  color: rgba(34, 197, 94, 0.5);
 }
 
-.creator {
-  margin-top: 0.5rem;
-  font-size: 0.7rem;
-}
-
-.creator a {
-  color: rgba(34, 197, 94, 0.8);
-  text-decoration: none;
-}
-
-.creator a:hover {
-  text-decoration: underline;
-}
-
-/* Modal */
 .modal {
   display: none;
   position: fixed;
@@ -208,6 +231,7 @@ footer {
   display: flex;
   flex-direction: column;
   animation: fadeIn 0.3s;
+  font-family: "IBM Plex Mono", monospace;
 }
 
 @keyframes fadeIn {
@@ -232,7 +256,7 @@ footer {
 
 .modal-header h2 {
   font-size: 1.25rem;
-  font-weight: 400;
+  font-weight: 500;
 }
 
 .close-button {
@@ -255,7 +279,6 @@ footer {
   max-height: 60vh;
 }
 
-/* Style the scrollbar */
 .modal-body::-webkit-scrollbar {
   width: 6px;
 }
@@ -269,8 +292,29 @@ footer {
   border-radius: 3px;
 }
 
-/* Responsive adjustments */
-@media (max-width: 600px) {
+/* Responsive */
+@media (max-width: 768px) {
+  header {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .header-left {
+    flex-basis: 100%;
+    justify-content: center;
+  }
+
+  .header-center {
+    order: 3;
+    flex-basis: 100%;
+  }
+
+  .header-right {
+    order: 2;
+    width: 100%;
+    justify-content: center;
+  }
+
   .modal-content {
     margin: 3% auto;
     width: 95%;

@@ -1,14 +1,12 @@
 const tasks = []
 
-
 const taskForm = document.getElementById("task-form")
 const taskInput = document.getElementById("task-input")
 const snakeGrid = document.getElementById("snake-grid")
-const footerText = document.getElementById("footer-text")
+const statusText = document.getElementById("status-text") // Changed back to statusText
 const instructionsButton = document.getElementById("instructions-button")
 const instructionsModal = document.getElementById("instructions-modal")
 const closeModalButton = document.getElementById("close-modal")
-
 
 taskForm.addEventListener("submit", addTask)
 instructionsButton.addEventListener("click", showInstructions)
@@ -17,17 +15,16 @@ window.addEventListener("click", (e) => {
   if (e.target === instructionsModal) {
     hideInstructions()
   }
-})
-
+})          
 
 function showInstructions() {
   instructionsModal.style.display = "block"
-  document.body.style.overflow = "hidden"
+  document.body.style.overflow = "hidden" // Prevent scrolling
 }
 
 function hideInstructions() {
   instructionsModal.style.display = "none"
-  document.body.style.overflow = "auto"
+  document.body.style.overflow = "auto" // Enable scrolling
 }
 
 function addTask(e) {
@@ -38,18 +35,20 @@ function addTask(e) {
     tasks.push(taskText)
     taskInput.value = ""
     updateSnake()
-    updateFooterText()
+    updateStatusText()
   }
 }
 
 function removeTask(index) {
   tasks.splice(index, 1)
   updateSnake()
-  updateFooterText()
+  updateStatusText()
 }
 
-function updateFooterText() {
-  footerText.textContent =
+
+function updateStatusText() {
+
+  statusText.textContent =
     tasks.length === 0 ? "Add tasks to grow the snake" : "Click on a snake segment to remove a task"
 }
 
@@ -125,8 +124,8 @@ function updateSnake() {
       eyesElement.appendChild(rightEye)
       segmentElement.appendChild(eyesElement)
     } else {
-      const taskIndex = index - 1
-
+      const taskIndex = index - 1 // Adjust for head
+      
       if (taskIndex >= 0 && taskIndex < tasks.length) {
         segmentElement.className = "snake-segment"
 
@@ -146,7 +145,6 @@ function updateSnake() {
 updateSnake()
 
 window.addEventListener("resize", updateSnake)
-
 if (!localStorage.getItem("instructionsShown")) {
   setTimeout(() => {
     showInstructions()
