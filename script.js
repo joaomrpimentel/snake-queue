@@ -3,7 +3,7 @@ const tasks = []
 const taskForm = document.getElementById("task-form")
 const taskInput = document.getElementById("task-input")
 const snakeGrid = document.getElementById("snake-grid")
-const statusText = document.getElementById("status-text") // Changed back to statusText
+const statusText = document.getElementById("status-text")
 const instructionsButton = document.getElementById("instructions-button")
 const instructionsModal = document.getElementById("instructions-modal")
 const closeModalButton = document.getElementById("close-modal")
@@ -15,16 +15,27 @@ window.addEventListener("click", (e) => {
   if (e.target === instructionsModal) {
     hideInstructions()
   }
-})          
+})
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "/" && document.activeElement !== taskInput) {
+    e.preventDefault()
+    taskInput.focus()
+  }
+
+  if (e.key === "Delete" && tasks.length > 0) {
+    removeTask(0)
+  }
+})
 
 function showInstructions() {
   instructionsModal.style.display = "block"
-  document.body.style.overflow = "hidden" // Prevent scrolling
+  document.body.style.overflow = "hidden"
 }
 
 function hideInstructions() {
   instructionsModal.style.display = "none"
-  document.body.style.overflow = "auto" // Enable scrolling
+  document.body.style.overflow = "auto"
 }
 
 function addTask(e) {
@@ -45,11 +56,11 @@ function removeTask(index) {
   updateStatusText()
 }
 
-
 function updateStatusText() {
-
   statusText.textContent =
-    tasks.length === 0 ? "Add tasks to grow the snake" : "Click on a snake segment to remove a task"
+    tasks.length === 0
+      ? "Add tasks to grow the snake (Press '/' to focus)"
+      : "Click on a snake segment to remove a task (or press 'Delete' for first task)"
 }
 
 function generateSnakePath(length) {
@@ -124,10 +135,14 @@ function updateSnake() {
       eyesElement.appendChild(rightEye)
       segmentElement.appendChild(eyesElement)
     } else {
-      const taskIndex = index - 1 // Adjust for head
-      
+      const taskIndex = index - 1
+
       if (taskIndex >= 0 && taskIndex < tasks.length) {
         segmentElement.className = "snake-segment"
+
+        if (taskIndex === 0) {
+          segmentElement.classList.add("first-task")
+        }
 
         segmentElement.addEventListener("click", () => removeTask(taskIndex))
 
@@ -145,6 +160,7 @@ function updateSnake() {
 updateSnake()
 
 window.addEventListener("resize", updateSnake)
+
 if (!localStorage.getItem("instructionsShown")) {
   setTimeout(() => {
     showInstructions()
