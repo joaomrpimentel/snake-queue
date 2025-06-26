@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,7 +14,7 @@
         <h1>SNAKE QUEUE</h1>
       </div>
       <div class="header-center">
-        <p id="status-text" class="status-text">Add tasks to grow the snake (Press '/' to focus)</p>
+        <p id="status-text" class="status-text"></p>
       </div>
       <div class="header-right">
         <p class="creator">by <a href="https://github.com/joaomrpimentel" target="_blank">João Pimentel</a></p>
@@ -35,7 +35,7 @@
         placeholder="Enter new task... (Press '/' to focus)" 
         required
       >
-      <button type="submit">
+      <button type="submit" aria-label="Add task">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M5 12h14"></path>
           <path d="M12 5v14"></path>
@@ -55,7 +55,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h2>How to Use Snake Queue</h2>
-        <button id="close-modal" class="close-button">
+        <button id="close-modal" class="close-button" aria-label="Close modal">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -67,34 +67,33 @@
         <p>A minimalist task manager inspired by the classic snake game.</p>
         
         <div class="instruction">
-          <h4> Adding Tasks</h4>
+          <h4>Adding Tasks</h4>
           <p>1. Type your task in the input field at the top</p>
           <p>2. Press Enter or click the + button to add it</p>
           <p>3. Watch the snake grow with each new task!</p>
         </div>
         
         <div class="instruction">
-          <h4> Viewing Tasks</h4>
+          <h4>Viewing Tasks</h4>
           <p>Hover over any segment of the snake to see the task description</p>
         </div>
         
         <div class="instruction">
-          <h4> Completing Tasks</h4>
+          <h4>Completing Tasks</h4>
           <p>Click on any segment of the snake to mark that task as complete</p>
           <p>The snake will shrink as you complete tasks</p>
         </div>
         
         <div class="instruction">
-          <h4> Keyboard Shortcuts</h4>
+          <h4>Keyboard Shortcuts</h4>
           <p>• Press <kbd>/</kbd> to quickly focus on the task input</p>
           <p>• Press <kbd>Delete</kbd> to remove the first task in the queue</p>
         </div>
         
         <div class="instruction">
-          <h4> Important Notes</h4>
-          <p>• Tasks exist only during the current session</p>
-          <p>• Refreshing the page will clear all tasks</p>
-          <p>• Tasks are completed in any order you choose</p>
+          <h4>Important Notes</h4>
+          <p>• Your tasks are now saved in your browser!</p>
+          <p>• Refreshing the page will no longer clear your tasks.</p>
         </div>
       </div>
     </div>

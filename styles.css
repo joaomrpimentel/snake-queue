@@ -1,6 +1,7 @@
+/* Estilos CSS do projeto */
 @font-face {
   font-family: "IBM Plex Mono";
-  src: url("./fonts/IBMPlexMono-Medium.ttf") format("truetype");
+  src: url("https://fonts.gstatic.com/s/ibmplexmono/v19/goksH_FrSmKudBwLf32eAx_Rvn-inA.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -155,6 +156,7 @@ button:hover {
   height: 100%;
   position: relative;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .snake-segment:hover {
@@ -184,7 +186,7 @@ button:hover {
   position: absolute;
   top: 0;
   left: 50%;
-  transform: translate(-50%, -100%);
+  transform: translate(-50%, -110%);
   background-color: #000;
   border: 1px solid #22c55e;
   color: #22c55e;
@@ -196,6 +198,7 @@ button:hover {
   transition: opacity 0.2s;
   pointer-events: none;
   font-family: "IBM Plex Mono", monospace;
+  border-radius: 4px;
 }
 
 .snake-segment:hover .task-tooltip {
