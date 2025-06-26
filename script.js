@@ -39,13 +39,17 @@ window.addEventListener("click", (e) => {
 });
 
 document.addEventListener("keydown", (e) => {
-  if (e.key === "/" && document.activeElement !== taskInput) {
+  // Impede que o atalho "/" funcione quando se está a editar uma tarefa
+  if (e.key === "/" && document.activeElement.tagName.toLowerCase() !== 'input') {
     e.preventDefault();
     taskInput.focus();
   }
 
   if (e.key === "Delete" && tasks.length > 0) {
-    removeTask(0);
+    // Impede que se apague a tarefa enquanto se edita
+    if (document.activeElement.tagName.toLowerCase() !== 'input') {
+       removeTask(0);
+    }
   }
 });
 
@@ -92,13 +96,51 @@ function removeTask(index) {
 }
 
 /**
+ * Entra no modo de edição para uma tarefa.
+ * @param {number} taskIndex O índice da tarefa a ser editada.
+ * @param {HTMLElement} segmentElement O elemento do segmento da cobra que foi clicado.
+ */
+function editTask(taskIndex, segmentElement) {
+    const tooltip = segmentElement.querySelector('.task-tooltip');
+    if (tooltip) tooltip.style.display = 'none';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = tasks[taskIndex];
+    input.className = 'task-edit-input';
+
+    segmentElement.innerHTML = '';
+    segmentElement.appendChild(input);
+    input.focus();
+
+    const saveEdit = () => {
+        const newText = input.value.trim();
+        if (newText && newText !== tasks[taskIndex]) {
+            tasks[taskIndex] = newText;
+            saveTasks();
+        }
+        updateSnake(); 
+    };
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            saveEdit();
+        } else if (e.key === 'Escape') {
+            updateSnake();
+        }
+    });
+    input.addEventListener('blur', saveEdit);
+}
+
+
+/**
  * Atualiza o texto de status com base no número de tarefas.
  */
 function updateStatusText() {
   statusText.textContent =
     tasks.length === 0
       ? "Add tasks to grow the snake (Press '/' to focus)"
-      : "Click on a snake segment to remove a task (or press 'Delete' for first task)";
+      : "Click to complete, Double-click to edit, DEL for first";
 }
 
 // --- Lógica de Renderização da Cobra ---
@@ -195,7 +237,23 @@ function updateSnake() {
 
       if (taskIndex >= 0 && taskIndex < tasks.length) {
         segmentElement.className = "snake-segment";
-        segmentElement.addEventListener("click", () => removeTask(taskIndex));
+        let clickTimer = null;
+
+        segmentElement.addEventListener('click', () => {
+          if (clickTimer) {
+            // Se um timer já existe, é um duplo clique.
+            clearTimeout(clickTimer);
+            clickTimer = null;
+            editTask(taskIndex, segmentElement);
+          } else {
+            // No primeiro clique, define um timer.
+            clickTimer = setTimeout(() => {
+              // Se o timer terminar, é um clique simples.
+              removeTask(taskIndex);
+              clickTimer = null;
+            }, 250); // Atraso de 250ms para detetar o duplo clique
+          }
+        });
 
         const tooltipElement = document.createElement("div");
         tooltipElement.className = "task-tooltip";

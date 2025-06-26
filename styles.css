@@ -1,7 +1,7 @@
 /* Estilos CSS do projeto */
 @font-face {
   font-family: "IBM Plex Mono";
-  src: url("https://fonts.gstatic.com/s/ibmplexmono/v19/goksH_FrSmKudBwLf32eAx_Rvn-inA.woff2") format("woff2");
+  src: url("./fonts/IBMPlexMono-Medium.ttf") format("truetype");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -157,6 +157,9 @@ button:hover {
   position: relative;
   cursor: pointer;
   transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .snake-segment:hover {
@@ -332,4 +335,17 @@ footer {
   .modal-header h2 {
     font-size: 1.1rem;
   }
+}
+
+.task-edit-input {
+    width: 90%;
+    height: 90%;
+    background-color: #000;
+    border: 1px solid #4ade80;
+    color: #4ade80;
+    text-align: center;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.75rem;
+    outline: none;
+    border-radius: 2px;
 }
