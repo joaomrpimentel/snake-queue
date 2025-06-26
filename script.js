@@ -9,6 +9,88 @@ const statusText = document.getElementById("status-text");
 const instructionsButton = document.getElementById("instructions-button");
 const instructionsModal = document.getElementById("instructions-modal");
 const closeModalButton = document.getElementById("close-modal");
+const muteButton = document.getElementById("mute-button");
+
+const audioManager = {
+  audioCtx: null,
+  isMuted: false,
+
+  init() {
+    try {
+      this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) {
+      console.error("Web Audio API is not supported in this browser");
+    }
+    
+    this.isMuted = localStorage.getItem('snakeIsMuted') === 'true';
+    this.updateMuteButton();
+  },
+
+  playSound(type) {
+    if (!this.audioCtx || this.isMuted) return;
+
+    this.audioCtx.resume();
+
+    const oscillator = this.audioCtx.createOscillator();
+    const gainNode = this.audioCtx.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(this.audioCtx.destination);
+    
+    let volume, freq, oscType, duration;
+
+    switch(type) {
+      case 'add':
+        volume = 0.4;
+        freq = 300;
+        oscType = 'triangle';
+        duration = 0.3;
+        break;
+      case 'remove':
+        volume = 0.12;
+        freq = 150;
+        oscType = 'square';
+        duration = 0.2;
+        break;
+      case 'edit':
+        volume = 0.4;
+        freq = 440;
+        oscType = 'sine';
+        duration = 0.15;
+        break;
+      default:
+        return; 
+    }
+
+    gainNode.gain.setValueAtTime(volume, this.audioCtx.currentTime);
+    oscillator.type = oscType;
+    oscillator.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
+    
+    gainNode.gain.exponentialRampToValueAtTime(0.00001, this.audioCtx.currentTime + duration);
+
+    oscillator.start(this.audioCtx.currentTime);
+    oscillator.stop(this.audioCtx.currentTime + duration);
+  },
+  
+  toggleMute() {
+    this.isMuted = !this.isMuted;
+    localStorage.setItem('snakeIsMuted', this.isMuted);
+    this.updateMuteButton();
+  },
+
+  updateMuteButton() {
+    const soundOnIcon = muteButton.querySelector('.sound-on');
+    const soundOffIcon = muteButton.querySelector('.sound-off');
+    if (this.isMuted) {
+      soundOnIcon.style.display = 'none';
+      soundOffIcon.style.display = 'block';
+    } else {
+      soundOnIcon.style.display = 'block';
+      soundOffIcon.style.display = 'none';
+    }
+  }
+};
+
 
 /**
  * Carrega as tarefas salvas do localStorage para a variável `tasks`.
@@ -32,6 +114,8 @@ function saveTasks() {
 taskForm.addEventListener("submit", addTask);
 instructionsButton.addEventListener("click", showInstructions);
 closeModalButton.addEventListener("click", hideInstructions);
+muteButton.addEventListener("click", () => audioManager.toggleMute());
+
 window.addEventListener("click", (e) => {
   if (e.target === instructionsModal) {
     hideInstructions();
@@ -78,6 +162,7 @@ function addTask(e) {
   if (taskText) {
     tasks.push(taskText);
     taskInput.value = "";
+    audioManager.playSound('add');
     updateSnake();
     updateStatusText();
     saveTasks(); // Salva as tarefas após adicionar uma nova
@@ -90,6 +175,7 @@ function addTask(e) {
  */
 function removeTask(index) {
   tasks.splice(index, 1);
+  audioManager.playSound('remove');
   updateSnake();
   updateStatusText();
   saveTasks(); // Salva as tarefas após remover uma
@@ -101,6 +187,7 @@ function removeTask(index) {
  * @param {HTMLElement} segmentElement O elemento do segmento da cobra que foi clicado.
  */
 function editTask(taskIndex, segmentElement) {
+    audioManager.playSound('edit');
     const tooltip = segmentElement.querySelector('.task-tooltip');
     if (tooltip) tooltip.style.display = 'none';
 
@@ -145,11 +232,6 @@ function updateStatusText() {
 
 // --- Lógica de Renderização da Cobra ---
 
-/**
- * Gera o caminho da cobra em uma grade.
- * @param {number} length O número de segmentos da cobra (tarefas).
- * @returns {{path: Array, gridSize: number}} O caminho e o tamanho da grade.
- */
 function generateSnakePath(length) {
   const gridSize = Math.max(5, Math.ceil(Math.sqrt(length + 1)) + 2);
 
@@ -164,7 +246,7 @@ function generateSnakePath(length) {
     let prevY = y;
     
     let attempts = 0;
-    while(attempts < 4) { // Tenta todas as 4 direções antes de desistir
+    while(attempts < 4) {
         let tempX = prevX;
         let tempY = prevY;
 
@@ -195,9 +277,6 @@ function generateSnakePath(length) {
   return { path, gridSize };
 }
 
-/**
- * Atualiza e renderiza a cobra na tela.
- */
 function updateSnake() {
   const { path, gridSize } = generateSnakePath(tasks.length);
 
@@ -240,18 +319,17 @@ function updateSnake() {
         let clickTimer = null;
 
         segmentElement.addEventListener('click', () => {
+          if(audioManager.audioCtx) audioManager.audioCtx.resume();
+
           if (clickTimer) {
-            // Se um timer já existe, é um duplo clique.
             clearTimeout(clickTimer);
             clickTimer = null;
             editTask(taskIndex, segmentElement);
           } else {
-            // No primeiro clique, define um timer.
             clickTimer = setTimeout(() => {
-              // Se o timer terminar, é um clique simples.
               removeTask(taskIndex);
               clickTimer = null;
-            }, 250); // Atraso de 250ms para detetar o duplo clique
+            }, 250);
           }
         });
 
@@ -276,14 +354,11 @@ if (!localStorage.getItem("instructionsShown")) {
   }, 500);
 }
 
-/**
- * Função de inicialização para carregar tudo na ordem correta.
- */
 function initialize() {
+    audioManager.init();
     loadTasks();
     updateSnake();
     updateStatusText();
 }
 
-// Inicia a aplicação quando o DOM está pronto.
 initialize();
