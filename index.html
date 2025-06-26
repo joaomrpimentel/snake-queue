@@ -18,7 +18,14 @@
       </div>
       <div class="header-right">
         <p class="creator">by <a href="https://github.com/joaomrpimentel" target="_blank">João Pimentel</a></p>
-        <button id="mute-button" class="instructions-button" aria-label="Toggle sound">
+        
+        <button id="theme-button" class="icon-button" aria-label="Change theme">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+          </svg>
+        </button>
+
+        <button id="mute-button" class="icon-button" aria-label="Toggle sound">
           <svg class="sound-on" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
             <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
@@ -29,13 +36,20 @@
             <line x1="17" y1="9" x2="23" y2="15"></line>
           </svg>
         </button>
-        <button id="instructions-button" class="instructions-button" aria-label="Show instructions">
+        
+        <button id="instructions-button" class="icon-button" aria-label="Show instructions">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
             <line x1="12" y1="17" x2="12.01" y2="17"></line>
           </svg>
         </button>
+        
+        <div id="theme-panel" class="theme-panel">
+            <div class="theme-option" data-theme="matrix" aria-label="Matrix theme"></div>
+            <div class="theme-option" data-theme="vaporwave" aria-label="Vaporwave theme"></div>
+            <div class="theme-option" data-theme="monochrome" aria-label="Monochrome theme"></div>
+        </div>
       </div>
     </header>
 
@@ -78,24 +92,18 @@
         <p>A minimalist task manager inspired by the classic snake game.</p>
         
         <div class="instruction">
-          <h4>Adding Tasks</h4>
-          <p>1. Type your task in the input field at the top</p>
-          <p>2. Press Enter or click the + button to add it</p>
-          <p>3. Watch the snake grow with each new task!</p>
+          <h4>Customization</h4>
+          <p>• Use the <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg> icon to change the color theme.</p>
+          <p>• Use the sound icon to mute/unmute audio effects.</p>
         </div>
-        
+
         <div class="instruction">
-          <h4>Viewing and Editing Tasks</h4>
+          <h4>Core Actions</h4>
           <p>• Hover over any segment to see the task description</p>
           <p>• Double-click on a segment to edit the task text</p>
+          <p>• Single-click on any segment to complete and remove a task</p>
         </div>
-        
-        <div class="instruction">
-          <h4>Completing Tasks</h4>
-          <p>Click on any segment of the snake to mark that task as complete</p>
-          <p>The snake will shrink as you complete tasks</p>
-        </div>
-        
+                
         <div class="instruction">
           <h4>Keyboard Shortcuts</h4>
           <p>• Press <kbd>/</kbd> to quickly focus on the task input</p>
@@ -103,9 +111,8 @@
         </div>
         
         <div class="instruction">
-          <h4>Sound and Notes</h4>
-          <p>• Use the sound icon in the header to mute/unmute audio effects.</p>
-          <p>• Your tasks and sound preferences are saved in your browser!</p>
+          <h4>Important Notes</h4>
+          <p>• Your tasks, theme, and sound preferences are saved in your browser!</p>
         </div>
       </div>
     </div>
