@@ -1,0 +1,21 @@
+name: Deploy snake-queue to website
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Deploy to website/snake-queue
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{ secrets.PERSONAL_TOKEN }}
+          external_repository: joaomrpimentel/website
+          publish_branch: gh-pages
+          publish_dir: .
+          destination_dir: snake-queue
