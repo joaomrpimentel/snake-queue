@@ -2,8 +2,10 @@
    SNAKE QUEUE
    every task is a piece of the snake. the one touching the
    head is next. click a piece to finish it (the snake eats
-   it and it goes on the receipt), double click to edit,
-   ctrl+z to take the last thing back.
+   it and you score), double click to edit, ctrl+z to take
+   the last thing back. on a phone: tap to read, tap again
+   to finish, hold to edit, undo from the message. the
+   handheld around the screen is optional.
    ========================================================= */
 
 const $ = (id) => document.getElementById(id);
@@ -52,30 +54,29 @@ function save() {
    so the language you picked there carries over here
    --------------------------------------------------------- */
 const EN = {
-  tagline: "TO-DO LIST<br>EVERY TASK IS A PIECE OF THE SNAKE",
+  tagline: "TO-DO LIST · EVERY TASK IS A PIECE OF THE SNAKE",
   by: "A JOTAVERSE PROJECT ↗", sound: "Sound", "lang-group": "Language",
   "scheme-group": "Theme", "scheme-auto": "Automatic (follows your device)", "scheme-light": "Light", "scheme-dark": "Dark",
   "new-task": "new task", placeholder: "what do you need to do?", add: "add",
   "edit-task": "Edit task", how: "how to use",
-  s1: "Type a task and press Enter. The snake grows. <kbd>/</kbd> jumps back to the text field.",
-  s2: "Hover a piece to see its task. Arrow keys move through the queue.",
-  s3: "Click to complete. <kbd>Del</kbd> completes the first in line.",
-  s4: "Double click or press <kbd>E</kbd> to edit. <kbd>Ctrl</kbd><kbd>Z</kbd> undoes.",
-  "hud-len": "LENGTH", "hud-eaten": "DONE", "hud-best": "BEST",
-  board: "Task queue", ink: "colour", "ink-group": "Snake colour",
-  "ink-phosphor": "green", "ink-blue": "blue", "ink-vapor": "pink", "ink-paper": "neutral",
-  slip: "Completed tasks", "slip-note": "the snake thanks you.<br>come again.", undo: "undo",
+  s1: "Type a task and press Enter: the snake grows a piece.<span class=\"pc\"> <kbd>/</kbd> jumps back to the input.</span>",
+  s2: "<span class=\"pc\">Hover a piece to read its task. With a piece focused, the arrow keys move along the queue.</span><span class=\"touch\">Tap a piece to read its task.</span>",
+  s3: "<span class=\"pc\">Click a piece to finish it. <kbd>Del</kbd> finishes the first in line.</span><span class=\"touch\">Tap the same piece again to finish it.</span> The snake eats it and you score.",
+  s4: "<span class=\"pc\">Double-click or press <kbd>E</kbd> to change the text. Mistake? <kbd>Ctrl</kbd><kbd>Z</kbd>.</span><span class=\"touch\">Press and hold a piece to change the text. Mistake? Tap undo on the message.</span>",
+  "hud-len": "QUEUE", "hud-eaten": "SCORE", "hud-best": "HI",
+  board: "Task queue", ink: "screen", "ink-group": "Screen color",
+  "ink-nokia": "classic", "ink-pocket": "pea", "ink-amber": "amber", "ink-blue": "blue",
+  device: "handheld", "device-group": "Handheld around the screen", "device-off": "off", "device-on": "on",
+  undo: "undo",
   // used from js only
   "empty-label": "empty queue", "empty-text": "No tasks yet. Add one and the snake grows.",
   position: "{i} of {n}", next: "next up", "seg-label": "{i}. {t}",
-  done: "completed: {t}", edited: "task edited", restored: "task restored",
-  "slip-no": "RECEIPT Nº {n}", "slip-none": "nothing completed yet", "slip-total": "{n} TASKS", "slip-total-1": "1 TASK",
+  done: "+1 · {t}", edited: "task edited", restored: "undone",
 };
 const PT_JS = {
   "empty-label": "fila vazia", "empty-text": "Nenhuma tarefa por enquanto. Adicione uma e a cobra cresce.",
   position: "{i} de {n}", next: "próxima", "seg-label": "{i}. {t}",
-  done: "concluída: {t}", edited: "tarefa editada", restored: "tarefa restaurada",
-  "slip-no": "RECIBO Nº {n}", "slip-none": "nenhuma tarefa concluída", "slip-total": "{n} TAREFAS", "slip-total-1": "1 TAREFA",
+  done: "+1 · {t}", edited: "tarefa editada", restored: "desfeito",
 };
 
 let lang = "pt";
@@ -119,10 +120,11 @@ const sound = {
 
   play(type) {
     if (this.muted) return;
+    // square blips that slide, like a handheld's beeper
     const tones = {
-      add:    { volume: 0.3, freq: 300, wave: "triangle", duration: 0.3 },
-      remove: { volume: 0.1, freq: 150, wave: "square",   duration: 0.2 },
-      edit:   { volume: 0.3, freq: 440, wave: "sine",     duration: 0.15 },
+      add:    { volume: 0.08, freq: 440, to: 880, wave: "square", duration: 0.12 },
+      remove: { volume: 0.08, freq: 660, to: 110, wave: "square", duration: 0.18 },
+      edit:   { volume: 0.06, freq: 990, to: 990, wave: "square", duration: 0.06 },
     };
     const tone = tones[type];
     try {
@@ -135,6 +137,7 @@ const sound = {
     osc.connect(gain).connect(this.ctx.destination);
     osc.type = tone.wave;
     osc.frequency.setValueAtTime(tone.freq, now);
+    osc.frequency.exponentialRampToValueAtTime(tone.to, now + tone.duration);
     gain.gain.setValueAtTime(tone.volume, now);
     gain.gain.exponentialRampToValueAtTime(0.00001, now + tone.duration);
     osc.start(now);
@@ -164,7 +167,7 @@ let scheme = store.get("snakeScheme") || "auto";
 function applyScheme() {
   const light = scheme === "light" || (scheme === "auto" && deviceLight.matches);
   document.documentElement.dataset.scheme = light ? "light" : "dark";
-  document.querySelector('meta[name="theme-color"]').content = light ? "#f4f1ea" : "#151412";
+  document.querySelector('meta[name="theme-color"]').content = light ? "#e7e3d6" : "#121410";
   document.querySelectorAll("button[data-scheme]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.scheme === scheme)));
 }
 document.querySelectorAll("button[data-scheme]").forEach((b) => b.addEventListener("click", () => {
@@ -176,21 +179,118 @@ deviceLight.addEventListener("change", applyScheme);
 applyScheme();
 
 /* ---------------------------------------------------------
-   ink. the old themes map straight onto the new inks
+   the screen's color. older saves picked a snake ink or a
+   theme; each maps onto the lcd closest to it
    --------------------------------------------------------- */
-const OLD_THEMES = { matrix: "phosphor", vaporwave: "vapor", monochrome: "paper" };
+const OLD_INKS = { phosphor: "nokia", blue: "blue", vapor: "amber", paper: "pocket", matrix: "nokia", vaporwave: "amber", monochrome: "pocket" };
 function setInk(ink) {
-  if (!document.querySelector(`.chip[data-ink="${ink}"]`)) ink = "phosphor";
+  ink = OLD_INKS[ink] || ink;
+  if (!document.querySelector(`.chip[data-ink="${ink}"]`)) ink = "nokia";
   document.documentElement.dataset.ink = ink;
   document.querySelectorAll(".chip[data-ink]").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.ink === ink)));
   store.set("snakeInk", ink);
 }
-setInk(store.get("snakeInk") || OLD_THEMES[store.get("snakeTheme")] || "phosphor");
+setInk(store.get("snakeInk") || store.get("snakeTheme") || "nokia");
 document.querySelectorAll(".chip[data-ink]").forEach((b) => b.addEventListener("click", () => setInk(b.dataset.ink)));
+
+/* the handheld: off by default, the screen stands on its own.
+   on, a flip phone render opens under the page and the live lcd is
+   laid onto its glass. the <head> already applied the saved choice.
+   only side by side: on a narrow screen the lcd would end up too
+   small to read, so there it's always off (styles.css hides the switch) */
+const deviceFig = document.querySelector(".device");
+const deviceImg = document.querySelector(".device-img");
+const lcd = document.querySelector(".lcd");
+const wide = matchMedia("(min-width: 861px)");
+const LCD_W = 440;          // the lcd's own width in css px, before it's mapped onto the glass
+let flip = null;            // assets/flip.json, once loaded
+
+function setDevice(device) {
+  device = device === "on" ? "on" : "off";
+  document.documentElement.dataset.device = device;
+  document.querySelectorAll("button[data-device]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.device === device)));
+  if (device === "on") loadFlip(); else layoutFlip();
+}
+
+async function loadFlip() {
+  if (!flip) {
+    try {
+      flip = await (await fetch("assets/flip.json")).json();
+    } catch {
+      setDevice("off");     // no geometry, no handheld
+      return;
+    }
+  }
+  layoutFlip();
+}
+
+/* the homography that takes a w×h rectangle onto the quad p (tl, tr,
+   br, bl), as a css matrix3d. heckbert's square-to-quad, then scaled
+   from the unit square to w×h */
+function quadMatrix(w, h, [[x0, y0], [x1, y1], [x2, y2], [x3, y3]]) {
+  const dx1 = x1 - x2, dx2 = x3 - x2, dx3 = x0 - x1 + x2 - x3;
+  const dy1 = y1 - y2, dy2 = y3 - y2, dy3 = y0 - y1 + y2 - y3;
+  const det = dx1 * dy2 - dx2 * dy1;
+  const g = (dx3 * dy2 - dx2 * dy3) / det;
+  const k = (dx1 * dy3 - dx3 * dy1) / det;
+  const a = x1 - x0 + g * x1, b = x3 - x0 + k * x3;
+  const d = y1 - y0 + g * y1, e = y3 - y0 + k * y3;
+  return `matrix3d(${[a / w, d / w, 0, g / w, b / h, e / h, 0, k / h, 0, 0, 1, 0, x0, y0, 0, 1].join(",")})`;
+}
+
+/* the figure becomes a box around the screen's glass. the render is
+   scaled so the glass fills it and placed around it, so the rest of
+   the phone spills out under the page (the hero clips it) */
+function layoutFlip() {
+  const on = document.documentElement.dataset.device === "on" && wide.matches && flip;
+  if (!on) {
+    deviceFig.style.removeProperty("width");
+    deviceFig.style.removeProperty("aspect-ratio");
+    ["width", "height", "transform"].forEach((p) => lcd.style.removeProperty(p));
+    return;
+  }
+  const { img_w, img_h, screen, screen_aspect } = flip;
+  // lazy until the handheld is first switched on, so nobody downloads it for nothing.
+  // a lazy image with no size never loads, so it gets its size and goes now
+  deviceImg.width = img_w;
+  deviceImg.height = img_h;
+  deviceImg.loading = "eager";
+  const quad = [screen.tl, screen.tr, screen.br, screen.bl];
+  const xs = quad.map((p) => p[0]), ys = quad.map((p) => p[1]);
+  const minX = Math.min(...xs), minY = Math.min(...ys);
+  const boxW = Math.max(...xs) - minX, boxH = Math.max(...ys) - minY;
+
+  // big enough to read, small enough that the hinge and the top of the
+  // keypad still show under it
+  const maxW = Math.min(520, innerWidth * 0.34);
+  const maxH = Math.max(260, innerHeight * 0.5);
+  const width = Math.min(maxW, maxH * (boxW / boxH));
+  const s = width / boxW;
+  deviceFig.style.width = width + "px";
+  deviceFig.style.aspectRatio = `${boxW} / ${boxH}`;
+
+  deviceImg.style.width = img_w * s + "px";
+  deviceImg.style.left = -minX * s + "px";
+  deviceImg.style.top = -minY * s + "px";
+
+  const lcdH = LCD_W / screen_aspect;
+  lcd.style.width = LCD_W + "px";
+  lcd.style.height = lcdH + "px";
+  lcd.style.transform = quadMatrix(LCD_W, lcdH, quad.map(([x, y]) => [(x - minX) * s, (y - minY) * s]));
+}
+
+setDevice(document.documentElement.dataset.device);
+document.querySelectorAll("button[data-device]").forEach((b) => b.addEventListener("click", () => {
+  setDevice(b.dataset.device);
+  store.set("snakeDevice", b.dataset.device);
+}));
+addEventListener("resize", layoutFlip);
+wide.addEventListener("change", layoutFlip);
 
 /* ---------------------------------------------------------
    toast, with an undo for the last thing that happened
    --------------------------------------------------------- */
+const touchOnly = matchMedia("(hover: none), (pointer: coarse)");
 let lastAction = null;      // { type: 'remove' | 'edit', index, text }
 let toastTimer = 0;
 
@@ -199,7 +299,9 @@ function toast(text, undoable) {
   $("toast-undo").hidden = !undoable;
   $("toast").classList.add("show");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => $("toast").classList.remove("show"), undoable ? 5000 : 1800);
+  // on a phone the message is the only undo there is, so it stays a while longer
+  const wait = undoable ? (touchOnly.matches ? 7000 : 5000) : 1800;
+  toastTimer = setTimeout(() => $("toast").classList.remove("show"), wait);
 }
 
 function undo() {
@@ -223,6 +325,7 @@ $("toast-undo").addEventListener("click", undo);
    tasks
    --------------------------------------------------------- */
 let shown = null;           // index under the cursor or focus; null means the first
+let picked = null;          // on touch: the piece tapped once, waiting for a second tap
 let editing = null;         // index being edited in the readout
 
 taskForm.addEventListener("submit", (e) => {
@@ -237,21 +340,21 @@ taskForm.addEventListener("submit", (e) => {
 });
 
 function removeTask(index, { refocus = false } = {}) {
-  hideHint();
   const [text] = tasks.splice(index, 1);
   eaten.push({ t: text, at: Date.now() });
   lastAction = { type: "remove", index, text };
   save();
   sound.play("remove");
   shown = null;
+  picked = null;
   render();
   toast(t("done", { t: text }), true);
   if (refocus && tasks.length) segAt(Math.min(index, tasks.length - 1))?.focus();
 }
 
 function startEdit(index) {
-  hideHint();
   if (editing !== null) finishEdit(true);
+  picked = null;
   editing = index;
   shown = index;
   sound.play("edit");
@@ -322,12 +425,8 @@ function side(a, b) {
 }
 const OPPOSITE = { l: "r", r: "l", u: "d", d: "u" };
 
-// round the core's corners between two free sides, and reach an arm out to each neighbour
+// reach an arm, as thick as the body, out to each neighbor: the snake is one piece
 function shape(el, touches) {
-  const free = (s) => !touches.includes(s);
-  const R = "50%";
-  el.style.cssText += `--tl:${free("u") && free("l") ? R : 0};--tr:${free("u") && free("r") ? R : 0};`
-    + `--br:${free("d") && free("r") ? R : 0};--bl:${free("d") && free("l") ? R : 0};`;
   if (!el.classList.contains("tail")) el.insertAdjacentHTML("beforeend", touches.map((s) => `<span class="arm arm-${s}"></span>`).join(""));
 }
 
@@ -371,6 +470,7 @@ function render({ fresh = -1, show } = {}) {
       el.tabIndex = index === (shown ?? 0) ? 0 : -1;    // one tab stop, arrows do the rest
       el.style.setProperty("--fade", (1 - 0.4 * (index / Math.max(1, tasks.length - 1))).toFixed(2));
       el.setAttribute("aria-label", t("seg-label", { i: index + 1, t: tasks[index] }));
+      el.classList.add("from-" + touches[0]);     // the seam goes on the side facing the head
       if (index === fresh) el.classList.add("is-new");
     }
     shape(el, touches);
@@ -381,15 +481,14 @@ function render({ fresh = -1, show } = {}) {
 
   snakeGrid.replaceChildren(...slots);
   $("hud-len").textContent = pad(tasks.length);
-  $("hud-eaten").textContent = pad(eaten.length);
+  $("hud-eaten").textContent = String(eaten.length).padStart(4, "0");
   $("hud-best").textContent = pad(best);
   paintReadout();
-  paintSlip();
 }
 
 function paintReadout() {
   if (editing !== null) return;
-  snakeGrid.querySelectorAll(".is-current").forEach((s) => s.classList.remove("is-current"));
+  snakeGrid.querySelectorAll(".is-current, .is-picked").forEach((s) => s.classList.remove("is-current", "is-picked"));
   if (!tasks.length) {
     readoutLabel.textContent = t("empty-label");
     readoutText.textContent = t("empty-text");
@@ -401,87 +500,117 @@ function paintReadout() {
   readoutText.textContent = tasks[i];
   readoutText.classList.remove("is-empty");
   segAt(i)?.classList.add("is-current");
+  if (picked !== null) segAt(picked)?.classList.add("is-picked");
 }
 
-// the receipt prints the last few things eaten
-function paintSlip() {
-  const time = new Intl.DateTimeFormat(lang === "en" ? "en-GB" : "pt-BR", { hour: "2-digit", minute: "2-digit" });
-  $("slip-no").textContent = t("slip-no", { n: String(eaten.length).padStart(4, "0") });
-  $("slip-date").textContent = new Date().toLocaleDateString(lang === "en" ? "en-GB" : "pt-BR");
-  $("slip-total").textContent = eaten.length === 1 ? t("slip-total-1") : t("slip-total", { n: eaten.length });
-  const lines = eaten.slice(-6).reverse().map(({ t: text, at }) => {
-    const li = document.createElement("li");
-    const what = document.createElement("span");
-    what.className = "what";
-    what.textContent = text;
-    const when = document.createElement("span");
-    when.textContent = time.format(at);
-    li.append(what, document.createElement("i"), when);
-    return li;
-  });
-  if (!lines.length) {
-    const li = document.createElement("li");
-    li.className = "none";
-    li.textContent = t("slip-none");
-    lines.push(li);
-  }
-  $("slip-lines").replaceChildren(...lines);
-}
-
-/* one click finishes, two edit. the single click waits a beat
-   so a double click doesn't finish the task first */
+/* with a mouse: one click finishes, two edit. the single click waits
+   a beat so a double click doesn't finish the task first.
+   with a finger: one tap picks the piece and shows it, a second tap
+   on the same piece finishes it, holding it edits */
 let clickTimer = 0;
+let pointerKind = "mouse";
+let holdTimer = 0;
+let held = false;
+let holdFrom = null;
+const HOLD_MS = 500;
+
+snakeGrid.addEventListener("pointerdown", (e) => {
+  pointerKind = e.pointerType;
+  if (e.pointerType !== "touch") return;
+  const seg = e.target.closest(".seg");
+  held = false;
+  clearTimeout(holdTimer);
+  if (!seg || editing !== null) return;
+  holdFrom = { x: e.clientX, y: e.clientY };
+  holdTimer = setTimeout(() => {
+    held = true;
+    startEdit(Number(seg.dataset.index));
+  }, HOLD_MS);
+});
+snakeGrid.addEventListener("pointermove", (e) => {
+  if (e.pointerType !== "touch" || !holdFrom) return;
+  if (Math.hypot(e.clientX - holdFrom.x, e.clientY - holdFrom.y) > 10) clearTimeout(holdTimer);
+});
+["pointerup", "pointercancel"].forEach((type) => snakeGrid.addEventListener(type, () => {
+  clearTimeout(holdTimer);
+  holdFrom = null;
+}));
+// after a hold, the finger lifting would click the piece, which steals
+// focus from the editor and closes it. cancelling the touchend stops that
+snakeGrid.addEventListener("touchend", (e) => {
+  if (!held) return;
+  e.preventDefault();
+  held = false;
+}, { passive: false });
+// a long press would open the browser's menu or select text instead
+snakeGrid.addEventListener("contextmenu", (e) => { if (pointerKind === "touch") e.preventDefault(); });
+
+function tap(index) {
+  if (picked === index) { removeTask(index); return; }
+  picked = index;
+  shown = index;
+  sound.play("edit");
+  paintReadout();
+}
+
 snakeGrid.addEventListener("click", (e) => {
   const seg = e.target.closest(".seg");
   if (!seg) return;
   const index = Number(seg.dataset.index);
   clearTimeout(clickTimer);
-  if (e.detail === 0) removeTask(index, { refocus: true });        // keyboard
-  else if (e.detail === 1) clickTimer = setTimeout(() => removeTask(index), 250);
+  if (e.detail === 0) { removeTask(index, { refocus: true }); return; }     // keyboard
+  if (pointerKind === "touch") {
+    if (held) held = false;            // the hold already opened the editor
+    else if (editing === null) tap(index);
+    return;
+  }
+  if (e.detail === 1) clickTimer = setTimeout(() => removeTask(index), 250);
   else startEdit(index);
 });
 
-/* hovering a piece shows its task right by the cursor; keyboard
-   focus puts it by the piece. the readout keeps it for touch */
-const hint = $("hint");
-function showHint(index, x, y) {
-  $("hint-label").innerHTML = t("position", { i: index + 1, n: tasks.length }) + (index === 0 ? ` · <b>${t("next")}</b>` : "");
-  $("hint-text").textContent = tasks[index];
-  hint.classList.add("show");
-  // keep it on screen: flip to the other side of the cursor near the edges
-  const w = hint.offsetWidth, h = hint.offsetHeight;
-  const left = x + 16 + w > innerWidth - 8 ? x - 16 - w : x + 16;
-  const top = y + 18 + h > innerHeight - 8 ? y - 12 - h : y + 18;
-  hint.style.translate = `${Math.max(8, left)}px ${Math.max(8, top)}px`;
-}
-const hideHint = () => hint.classList.remove("show");
+// a tap anywhere off the snake lets go of the picked piece
+document.addEventListener("pointerdown", (e) => {
+  if (e.pointerType !== "touch" || picked === null || e.target.closest(".seg, .toast")) return;
+  picked = null;
+  shown = null;
+  paintReadout();
+});
 
+/* hovering or focusing a piece puts its task on the screen's readout */
 function point(index) {
   if (editing !== null) return;
   shown = index;
   paintReadout();
 }
+/* and a little balloon by the cursor says which task it is, so you
+   don't have to look away to the readout */
+const hint = $("hint");
+function showHint(index, x, y) {
+  $("hint-label").innerHTML = t("position", { i: index + 1, n: tasks.length }) + (index === 0 ? ` · <b>${t("next")}</b>` : "");
+  $("hint-text").textContent = tasks[index];
+  hint.classList.add("show");
+  const w = hint.offsetWidth, h = hint.offsetHeight;
+  const left = Math.min(x + 16, innerWidth - w - 8);
+  const top = y + 20 + h > innerHeight ? y - h - 12 : y + 20;
+  hint.style.translate = `${Math.max(8, left)}px ${Math.max(8, top)}px`;
+}
+const hideHint = () => hint.classList.remove("show");
 snakeGrid.addEventListener("pointermove", (e) => {
   const seg = e.target.closest(".seg");
-  if (!seg || editing !== null || e.pointerType === "touch") return hideHint();
+  if (!seg || editing !== null || e.pointerType === "touch") { hideHint(); return; }
   const index = Number(seg.dataset.index);
   if (shown !== index) point(index);
   showHint(index, e.clientX, e.clientY);
 });
+snakeGrid.addEventListener("pointerdown", hideHint);
 snakeGrid.addEventListener("focusin", (e) => {
   const seg = e.target.closest(".seg");
   if (!seg) return;
-  const index = Number(seg.dataset.index);
-  point(index);
-  if (seg.matches(":focus-visible")) {
-    const r = seg.getBoundingClientRect();
-    showHint(index, r.right - 8, r.bottom - 8);
-  }
+  point(Number(seg.dataset.index));
 });
-snakeGrid.addEventListener("focusout", hideHint);
 snakeGrid.addEventListener("pointerleave", () => {
   hideHint();
-  if (editing !== null || snakeGrid.contains(document.activeElement)) return;
+  if (editing !== null || picked !== null || snakeGrid.contains(document.activeElement)) return;
   shown = null;
   paintReadout();
 });

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 20 20" shape-rendering="crispEdges">
-  <!-- the pixel snake from the mark, on the page ink -->
-  <rect x="-2" y="-2" width="20" height="20" fill="#151412"/>
-  <path fill="#4ade80" d="M3 2h9v2h-9zM2 3h2v4h-2zM3 6h10v2h-10zM12 7h2v4h-2zM3 10h10v2h-10zM1 10h2v1h-2zM11 1h4v4h-4z"/>
-  <path fill="#151412" d="M13 2h1v1h-1z"/>
+  <!-- the pixel snake from the mark, lit on the classic lcd -->
+  <rect x="-2" y="-2" width="20" height="20" fill="#c7f0d8"/>
+  <path fill="#43523d" d="M3 2h9v2h-9zM2 3h2v4h-2zM3 6h10v2h-10zM12 7h2v4h-2zM3 10h10v2h-10zM1 10h2v1h-2zM11 1h4v4h-4z"/>
+  <path fill="#c7f0d8" d="M13 2h1v1h-1z"/>
 </svg>
